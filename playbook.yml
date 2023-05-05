@@ -1,0 +1,28 @@
+---
+- hosts: demo
+  become: true
+  become_user: root
+  tasks:
+    - name: install docker and git
+      yum:
+        name: "{{item}}"
+        loop:
+          - git
+          - docker
+        state: present
+    - name: start docker
+      service:
+        name: docker
+        state: restarted
+    - name: copy artifact to test server
+      copy:
+        src: /var/lib/jenkins/workspace/project1pipeline/target/addressbook.war
+        dest: .
+    - name: copy docker file to remote server
+      copy:
+        src: /var/lib/jenkins/workspace/project1pipeline/dockerfile
+        dest: .
+    - name: build docker image
+      command: docker build -t myproject1image
+    - name: run docker
+      command: docker run -d -P myproject1image
