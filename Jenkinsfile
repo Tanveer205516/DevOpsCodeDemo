@@ -17,7 +17,7 @@ pipeline
             {
                 
                 echo 'cloning'
-                git 'https://github.com/Sonal0409/DevOpsClassCodes.git'
+                git 'https://github.com/sanjeev206/DevOpsCodeDemo.git'
               }
           }
         stage('Compile')
@@ -62,8 +62,9 @@ pipeline
         {
             steps
             {
-                sh 'sudo chmod 777 /var/run/docker.sock'
-                sh 'docker built -t myproject1image'
+                //sh 'chmod 777 /var/run/docker.sock'
+                sh 'sudo cp /var/lib/jenkins/workspace/project1pipeline/target/addressbook.war .'
+                sh 'docker build -t myproject1image .'
 
             }
         }
@@ -83,6 +84,7 @@ pipeline
         }
         stage('deployment via Ansible')
         {
+            steps
             {
                 ansiblePlaybook become: true, credentialsId: 'ansible_client', disableHostKeyChecking: true, installation: 'myansible', inventory: 'demo.inv', playbook: 'playbook.yml'
 
