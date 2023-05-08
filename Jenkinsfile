@@ -10,7 +10,7 @@ pipeline
 
     stages
     {
-        stage('Checkout')
+        stage('Cloning code from Git')
         {
             //agent{ label 'linux_slave'}
             steps
@@ -58,37 +58,37 @@ pipeline
                 sh 'mvn package'
             }
         }
-        stage('build docker image')
+        stage('push code to test server and image to docker Hub')
+        //stage('build docker image')
         {
-            steps
-            {
-                //sh 'chmod 777 /var/run/docker.sock'
-                sh 'sudo cp /var/lib/jenkins/workspace/project1pipeline/target/addressbook.war .'
-                sh 'docker build -t myproject1image .'
-
-            }
-        }
-        stage('Push image to dockerhub')
-        {
-            steps
-            {
-                
-                withCredentials([string(credentialsId: 'dockerhub_pwd', variable: 'dockerhub_pwd')]) 
+            //steps
+            //{
+                parallel
                 {
-                    sh 'docker login -u sanju206 -p ${dockerhub_pwd}'
-                }
-                sh 'docker tag myproject1image sanju206/myproject1image'
-                sh 'docker push  sanju206/myproject1image'
-                
-            }
-        }
-        stage('deployment via Ansible')
-        {
-            steps
-            {
-                ansiblePlaybook become: true, credentialsId: 'ansible_client', disableHostKeyChecking: true, installation: 'myansible', inventory: 'demo.inv', playbook: 'playbook.yml'
+                    stage('docker hub')
+                    {
+                        steps{
+                            //sh 'chmod 777 /var/run/docker.sock'
+                            sh 'sudo cp /var/lib/jenkins/workspace/project1pipeline/target/addressbook.war .'
+                            sh 'docker build -t myproject1image .'
+                            withCredentials([string(credentialsId: 'dockerhub_pwd', variable: 'dockerhub_pwd')])
+                                {
+                                    sh 'docker login -u sanju206 -p ${dockerhub_pwd}'
+                                }
+                            sh 'docker tag myproject1image sanju206/myproject1image'
+                            sh 'docker push  sanju206/myproject1image'
+                        }
+                    }
 
-            }
+                    stage('Test deployment')
+                    {
+                        steps
+                        {
+                            ansiblePlaybook become: true, credentialsId: 'ec2-user', disableHostKeyChecking: true, installation: 'myansible', inventory: 'demo.inv', playbook: 'playbook.yml'
+                        }
+                    }
+                }
+            //}
         }
     }
 }
