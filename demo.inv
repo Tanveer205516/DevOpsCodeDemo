@@ -1,2 +1,2 @@
 [demo]
-172.31.6.118 ansible_user=sanju
+172.31.39.221 ansible_user=ec2-user
