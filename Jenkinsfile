@@ -1,11 +1,5 @@
 pipeline
 {
-    tools
-    {
-       
-        maven 'mymaven'
-        ansible 'myansible'
-    }
 	agent any
 
     stages
@@ -73,10 +67,10 @@ pipeline
                             sh 'docker build -t myproject1image .'
                             withCredentials([string(credentialsId: 'dockerhub_pwd', variable: 'dockerhub_pwd')])
                                 {
-                                    sh 'docker login -u sanju206 -p ${dockerhub_pwd}'
+                                    sh 'docker login -u ahmadtanveer80 -p ${dockerhub_pwd}'
                                 }
-                            sh 'docker tag myproject1image sanju206/myproject1image'
-                            sh 'docker push  sanju206/myproject1image'
+                            sh 'docker tag myproject1image ahmadtanveer80/myproject1image'
+                            sh 'docker push  ahmadtanveer80/myproject1image'
                         }
                     }
 
@@ -84,7 +78,7 @@ pipeline
                     {
                         steps
                         {
-                            ansiblePlaybook become: true, credentialsId: 'ec2-user', disableHostKeyChecking: true, installation: 'myansible', inventory: 'demo.inv', playbook: 'playbook.yml'
+                            ansiblePlaybook become: true, credentialsId: 'edureka', disableHostKeyChecking: true, installation: 'myansible', inventory: 'demo.inv', playbook: 'playbook.yml'
                         }
                     }
                 }
